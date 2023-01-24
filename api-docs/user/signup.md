@@ -2,7 +2,7 @@
 
 ## signup
 
-<img src="https://img.shields.io/badge/GET-green?style=plastic&logo=appveyor&logo=GET"/> 
+<img src="https://img.shields.io/badge/POST-green?style=plastic&logo=appveyor&logo=POST"/> 
 http://localhost:8000/user/signup
 
 ### Parameter

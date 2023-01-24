@@ -29,10 +29,15 @@ export class UserController {
   }
 
   async login(req: Request, res: Response) {
-    const loginDto: LoginDto = req.body;
+    const loginDto = new LoginDto(req.body.email, req.body.password);
+
     await validateReqParams(loginDto);
 
-    const ipDeviceDto: IpDeviceDto = req['setReqIpDevice'];
+    const ipDeviceDto = new IpDeviceDto(
+      req['setReqIpDevice']['ip'],
+      req['setReqIpDevice']['device'],
+    );
+
     await validateReqParams(ipDeviceDto);
 
     const { accessToken, index } = await userService.login(loginDto, ipDeviceDto);
@@ -45,7 +50,12 @@ export class UserController {
   }
 
   async reissue(req: Request, res: Response) {
-    const ipDeviceDto: IpDeviceDto = req['setReqIpDevice'];
+    const ipDeviceDto = new IpDeviceDto(
+      req['setReqIpDevice']['ip'],
+      req['setReqIpDevice']['device'],
+    );
+    await validateReqParams(ipDeviceDto);
+
     const userId: number = req['userId'];
 
     const { accessToken, index } = await userService.reissue(ipDeviceDto, userId);

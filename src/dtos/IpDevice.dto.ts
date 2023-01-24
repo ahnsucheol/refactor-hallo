@@ -6,4 +6,9 @@ export class IpDeviceDto {
 
   @IsString()
   device: string;
+
+  constructor(ip: string, device: string) {
+    this.ip = ip;
+    this.device = device;
+  }
 }

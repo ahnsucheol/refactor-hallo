@@ -45,7 +45,7 @@ export class UserService {
     return { accessToken, index };
   }
 
-  async reissue(ipDeviceDto: IpDeviceDto, refreshTokenIndex: string, userId: number) {
+  async reissue(ipDeviceDto: IpDeviceDto, userId: number) {
     const user: User = await userDao.findByUserId(userId);
     const tokens = await this.getToken(userId);
 
