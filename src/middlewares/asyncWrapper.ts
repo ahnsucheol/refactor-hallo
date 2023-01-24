@@ -6,6 +6,7 @@ const asyncWrapper = (fn: any) => {
     try {
       await fn(req, res);
     } catch (err: any) {
+      console.log(err);
       return res.status(err.code).send(resObject.fail(err.message));
     }
   };
