@@ -46,14 +46,9 @@ export class UserController {
 
   async reissue(req: Request, res: Response) {
     const ipDeviceDto: IpDeviceDto = req['setReqIpDevice'];
-    const refreshTokenIndex: string = req['refreshTokenIndex'];
     const userId: number = req['userId'];
 
-    const { accessToken, index } = await userService.reissue(
-      ipDeviceDto,
-      refreshTokenIndex,
-      userId,
-    );
+    const { accessToken, index } = await userService.reissue(ipDeviceDto, userId);
     res.clearCookie(COOKIE_NAME);
     res.cookie(COOKIE_NAME, index, COOKIE_OPTIONS);
     res

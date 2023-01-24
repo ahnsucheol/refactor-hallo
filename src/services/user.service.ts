@@ -28,7 +28,7 @@ export class UserService {
   async login(loginDto: LoginDto, ipDeviceDto: IpDeviceDto) {
     const user: User = await userDao.login(loginDto.email);
     if (!user) {
-      throw new UserNotFoundException(resMessage.LOGIN_SUCCESS);
+      throw new UserNotFoundException(resMessage.BAD_REQUEST);
     }
     if (!bcryptjs.compareSync(loginDto.password, user.password)) {
       throw new UserNotFoundException(resMessage.BAD_REQUEST);
