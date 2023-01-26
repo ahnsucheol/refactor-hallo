@@ -4,6 +4,7 @@ import { resMessage } from '../utils/resMessage';
 import { myDataSource } from '../configs/db.config';
 import { User } from '../entities/user.entity';
 import SignupFailException from '../exceptions/user/SignupFailException';
+import { LoginDto } from '../dtos/login.dto';
 
 export class UserDao {
   private userRepository = myDataSource.getRepository(User);
@@ -28,5 +29,14 @@ export class UserDao {
 
       throw new SignupFailException(resMessage.BAD_REQUEST);
     }
+  }
+
+  async login(email: string) {
+    const user: User = await this.userRepository.findOneBy({ email });
+    return user;
+  }
+
+  async findByUserId(userId: number) {
+    return await this.userRepository.findOneBy({ id: userId });
   }
 }
