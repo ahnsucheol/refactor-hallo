@@ -49,7 +49,24 @@ Refesh_Token_Index=XEc8N9n6Vkvq9JaggXzkmVO2dpJPA465QeMsyrn22zQ
 
 <img src="https://img.shields.io/badge/404-DB3A00?style=plastic&logo=appveyor&logo=404"/> 
 <details>
-<summary>결과값 - 입력값 오류</summary>
+<summary>결과값 - 입력값 틀림</summary>
+<div markdown="1">
+
+```json
+{
+  "success": false,
+  "message": "올바르지않은 요청입니다."
+}
+```
+
+</div>
+</details>
+
+<br>
+
+<img src="https://img.shields.io/badge/400-DB3A00?style=plastic&logo=appveyor&logo=400"/> 
+<details>
+<summary>결과값 - 입력값 부족</summary>
 <div markdown="1">
 
 ```json

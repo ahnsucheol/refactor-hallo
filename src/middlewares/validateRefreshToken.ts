@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import RunTimeException from '../exceptions/RunTimeException';
-import LoginFailException from '../exceptions/user/LoginFailException';
+import TokenReissueFailException from '../exceptions/user/TokenReissueFailException';
 import { TokenRedis } from '../redis/token.redis';
 import { UserService } from '../services/user.service';
 import { COOKIE_NAME, REFRESH_TOKEN_TYPE } from '../utils/constants';
@@ -21,16 +21,11 @@ export const validateRefreshToken = async (req, res: Response, next: NextFunctio
 
     jwt.verify(refreshToken, userService.getSecret(REFRESH_TOKEN_TYPE), (err: any, decode) => {
       if (err) {
-        if (
-          err.name === 'TokenExpiredError' ||
-          decode.userId !== userId ||
-          ip !== reqIp ||
-          device !== reqDevice
-        ) {
+        if (err.name === 'TokenExpiredError') {
           res.clearCookie(COOKIE_NAME);
           tokenRedis.deleteToken(req.refreshTokenIndex);
 
-          throw new LoginFailException(resMessage.LOGIN_FAILED);
+          throw new TokenReissueFailException(resMessage.TOKEN_REISSUE_FAILED);
         } else {
           throw new RunTimeException(
             statusCode.INTERNAL_SERVER_ERROR,
@@ -38,6 +33,12 @@ export const validateRefreshToken = async (req, res: Response, next: NextFunctio
           );
         }
       } else {
+        if (decode.userId !== userId || ip !== reqIp || device !== reqDevice) {
+          res.clearCookie(COOKIE_NAME);
+          tokenRedis.deleteToken(req.refreshTokenIndex);
+
+          throw new TokenReissueFailException(resMessage.TOKEN_REISSUE_FAILED);
+        }
         req.userId = decode.userId;
         next();
       }

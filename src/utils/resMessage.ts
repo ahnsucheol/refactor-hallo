@@ -9,4 +9,6 @@ export const resMessage = {
   LOGIN_FAILED: '로그인을 실패했습니다.',
   TOKEN_NOT_EXIST: '토큰이 존재하지 않습니다.',
   TOKEN_EXPIRED: '만료된 토큰입니다.',
+  TOKEN_REISSUE_SUCCESS: '토큰 재발행을 성공했습니다.',
+  TOKEN_REISSUE_FAILED: '토큰 재발행을 실패했습니다.',
 };

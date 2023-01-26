@@ -5,7 +5,7 @@ import { resMessage } from '../utils/resMessage';
 const validateReqParams = async (obj: any) => {
   await validate(obj).then(err => {
     if (err.length > 0) {
-      throw new ValidateReqParamsException(resMessage.BAD_REQUEST + err[0].property);
+      throw new ValidateReqParamsException(resMessage.BAD_REQUEST);
     }
   });
 };

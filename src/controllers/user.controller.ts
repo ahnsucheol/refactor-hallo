@@ -63,7 +63,7 @@ export class UserController {
     res.cookie(COOKIE_NAME, index, COOKIE_OPTIONS);
     res
       .status(statusCode.CREATED)
-      .send(resObject.success(resMessage.LOGIN_SUCCESS, { accessToken }));
+      .send(resObject.success(resMessage.TOKEN_REISSUE_SUCCESS, { accessToken }));
   }
 }
 
