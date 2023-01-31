@@ -18,5 +18,6 @@ userRouter.post(
   validateRefreshToken,
   asyncWrapper(userController.reissue),
 );
+userRouter.post('/logout', setReqIpDevice, setReqTokens, asyncWrapper(userController.logout));
 
 export default userRouter;

@@ -1,4 +1,4 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { UserService } from '../services/user.service';
 import { ACCESS_TOKEN_TYPE } from '../utils/constants';
@@ -8,13 +8,17 @@ import { statusCode } from '../utils/statusCode';
 
 const userService = new UserService();
 
-export const validateAccessToken = async (req, res: Response, next: NextFunction) => {
+export const validateAccessToken = async (req: Request, res: Response, next: NextFunction) => {
   const accessToken = req.setReqTokens.accessToken;
   const { userId, ip, device } = req.setReqTokens.redisToken;
   const reqIp = req.setReqIpDevice.ip;
   const reqDevice = req.setReqIpDevice.device;
 
+  await userService.isBlacklistedToken(accessToken);
+
   jwt.verify(accessToken, userService.getSecret(ACCESS_TOKEN_TYPE), (err: any, decode) => {
+    console.log(decode);
+
     if (err) {
       if (err.name === 'TokenExpiredError') {
         res.status(statusCode.UNAUTHORIZED).send(resObject.fail(resMessage.TOKEN_EXPIRED));
@@ -24,7 +28,7 @@ export const validateAccessToken = async (req, res: Response, next: NextFunction
           .send(resObject.fail(resMessage.INTERNAL_SERVER_ERROR));
       }
     } else {
-      if (decode.userId !== userId || ip !== reqIp || device !== reqDevice) {
+      if (decode['userId'] !== userId || ip !== reqIp || device !== reqDevice) {
         res.status(statusCode.UNAUTHORIZED).send(resObject.fail(resMessage.LOGIN_FAILED));
       } else {
         next();

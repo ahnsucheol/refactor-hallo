@@ -9,4 +9,5 @@ export const COOKIE_NAME = 'Refresh_Token_Index';
 export const COOKIE_OPTIONS = {
   httpOnly: true,
   expires: COOKIE_EXPIRATION,
+  encode: String,
 };

@@ -15,6 +15,8 @@ import {
 } from '../utils/constants';
 import { IpDeviceDto } from '../dtos/IpDevice.dto';
 import { TokenRedis } from '../redis/token.redis';
+import { TokenDto } from '../dtos/token.dto';
+import TokenExpiredException from '../exceptions/user/TokenExpiredException';
 
 const userDao = new UserDao();
 const tokenRedis = new TokenRedis();
@@ -45,16 +47,38 @@ export class UserService {
     return { accessToken, index };
   }
 
-  async reissue(ipDeviceDto: IpDeviceDto, userId: number) {
+  async reissue(setReqTokens: TokenDto, ipDeviceDto: IpDeviceDto, userId: number) {
     const user: User = await userDao.findByUserId(userId);
-    const tokens = await this.getToken(userId);
 
+    const accessEndTime = this.getEndTime(ACCESS_TOKEN_TYPE, setReqTokens.accessToken);
+    const refreshEndTime = this.getEndTime(
+      REFRESH_TOKEN_TYPE,
+      setReqTokens.redisToken.refreshToken,
+    );
+    await tokenRedis.blacklist(
+      setReqTokens.accessToken,
+      accessEndTime,
+      setReqTokens.redisToken.refreshToken,
+      refreshEndTime,
+    );
+
+    const tokens = await this.getToken(userId);
     const accessToken = tokens.accessToken;
 
     const index: string = this.hashIndex(user.nickname);
 
     await tokenRedis.updateToken(index, userId, tokens, ipDeviceDto);
     return { accessToken, index };
+  }
+
+  async logout(setReqTokens: TokenDto, refreshTokenIndex: string) {
+    const { accessToken, redisToken } = setReqTokens;
+
+    const accessEndTime = this.getEndTime(ACCESS_TOKEN_TYPE, accessToken);
+    const refreshEndTime = this.getEndTime(REFRESH_TOKEN_TYPE, redisToken.refreshToken);
+
+    await tokenRedis.deleteToken(refreshTokenIndex);
+    await tokenRedis.blacklist(accessToken, accessEndTime, redisToken.refreshToken, refreshEndTime);
   }
 
   private async getToken(userId: number) {
@@ -96,5 +120,22 @@ export class UserService {
       .replace('=', '');
 
     return index;
+  }
+
+  private getEndTime(tokenType: string, token: string) {
+    let endTime: number;
+    jwt.verify(token, this.getSecret(tokenType), (err, decode) => {
+      if (!err && typeof decode === 'object') {
+        const exp: number = decode.exp;
+        endTime = Math.floor((new Date(exp * 1000).getTime() - new Date().getTime()) / 1000);
+      } else {
+        throw new TokenExpiredException(resMessage.TOKEN_EXPIRED);
+      }
+    });
+    return endTime;
+  }
+
+  async isBlacklistedToken(token: string) {
+    await tokenRedis.isBlacklistedToken(token);
   }
 }

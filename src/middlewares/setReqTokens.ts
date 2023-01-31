@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
+import { RedisTokenDto } from '../dtos/redisToken.dto';
+import { TokenDto } from '../dtos/token.dto';
 import TokenNotFoundException from '../exceptions/user/TokenNotFoundException';
 import { TokenRedis } from '../redis/token.redis';
 import { COOKIE_NAME } from '../utils/constants';
@@ -8,22 +10,24 @@ import { statusCode } from '../utils/statusCode';
 
 const tokenRedis = new TokenRedis();
 
-const setReqTokens = async (req, res: Response, next: NextFunction) => {
+const setReqTokens = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authToken: string = req.headers.authorization || '';
     const cookieToken: string = req.headers.cookie || req.cookies.Refresh_Token_Index || '';
+
     if (!(authToken && cookieToken)) {
       throw new TokenNotFoundException(resMessage.TOKEN_NOT_EXIST);
     }
     const accessToken: string = authToken.split('Bearer ')[1] || '';
-    const refreshTokenIndex = cookieToken.split(COOKIE_NAME + '=')[1] || '';
+    const refreshTokenIndex: string = cookieToken.split(COOKIE_NAME + '=')[1] || '';
 
     if (!(accessToken && refreshTokenIndex)) {
       throw new TokenNotFoundException(resMessage.TOKEN_NOT_EXIST);
     }
-    const redisToken: object = await tokenRedis.getToken(refreshTokenIndex);
 
-    const setReqTokens = { accessToken, redisToken };
+    const redisToken: RedisTokenDto = await tokenRedis.getToken(refreshTokenIndex);
+
+    const setReqTokens: TokenDto = { accessToken, redisToken };
 
     req.setReqTokens = setReqTokens;
     req.refreshTokenIndex = refreshTokenIndex;
