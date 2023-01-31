@@ -8,6 +8,7 @@ import { resMessage } from '../utils/resMessage';
 import { resObject } from '../utils/resObject';
 import { statusCode } from '../utils/statusCode';
 import { IpDeviceDto } from '../dtos/IpDevice.dto';
+import { TokenDto } from '../dtos/token.dto';
 
 const userService = new UserService();
 
@@ -33,10 +34,7 @@ export class UserController {
 
     await validateReqParams(loginDto);
 
-    const ipDeviceDto = new IpDeviceDto(
-      req['setReqIpDevice']['ip'],
-      req['setReqIpDevice']['device'],
-    );
+    const ipDeviceDto = new IpDeviceDto(req.setReqIpDevice.ip, req.setReqIpDevice.device);
 
     await validateReqParams(ipDeviceDto);
 
@@ -50,20 +48,28 @@ export class UserController {
   }
 
   async reissue(req: Request, res: Response) {
-    const ipDeviceDto = new IpDeviceDto(
-      req['setReqIpDevice']['ip'],
-      req['setReqIpDevice']['device'],
-    );
+    const setReqTokens = new TokenDto(req.setReqTokens.accessToken, req.setReqTokens.redisToken);
+    await validateReqParams(setReqTokens);
+
+    const ipDeviceDto = new IpDeviceDto(req.setReqIpDevice.ip, req.setReqIpDevice.device);
     await validateReqParams(ipDeviceDto);
 
-    const userId: number = req['userId'];
+    const userId: number = req.userId;
 
-    const { accessToken, index } = await userService.reissue(ipDeviceDto, userId);
+    const { accessToken, index } = await userService.reissue(setReqTokens, ipDeviceDto, userId);
     res.clearCookie(COOKIE_NAME);
     res.cookie(COOKIE_NAME, index, COOKIE_OPTIONS);
     res
       .status(statusCode.CREATED)
       .send(resObject.success(resMessage.TOKEN_REISSUE_SUCCESS, { accessToken }));
+  }
+  async logout(req: Request, res: Response) {
+    const setReqTokens = req.setReqTokens;
+    const refreshTokenIndex = req.refreshTokenIndex;
+
+    await userService.logout(setReqTokens, refreshTokenIndex);
+    res.cookie(COOKIE_NAME, '', COOKIE_OPTIONS);
+    res.status(statusCode.OK).send(resObject.success(resMessage.LOGOUT_SUCCESS));
   }
 }
 

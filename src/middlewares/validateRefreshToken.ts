@@ -4,7 +4,7 @@ import RunTimeException from '../exceptions/RunTimeException';
 import TokenReissueFailException from '../exceptions/user/TokenReissueFailException';
 import { TokenRedis } from '../redis/token.redis';
 import { UserService } from '../services/user.service';
-import { COOKIE_NAME, REFRESH_TOKEN_TYPE } from '../utils/constants';
+import { COOKIE_NAME, COOKIE_OPTIONS, REFRESH_TOKEN_TYPE } from '../utils/constants';
 import { resMessage } from '../utils/resMessage';
 import { resObject } from '../utils/resObject';
 import { statusCode } from '../utils/statusCode';
@@ -12,17 +12,19 @@ import { statusCode } from '../utils/statusCode';
 const userService = new UserService();
 const tokenRedis = new TokenRedis();
 
-export const validateRefreshToken = async (req, res: Response, next: NextFunction) => {
+export const validateRefreshToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId, refreshToken, ip, device } = req.setReqTokens.redisToken;
 
     const reqIp = req.setReqIpDevice.ip;
     const reqDevice = req.setReqIpDevice.device;
 
-    jwt.verify(refreshToken, userService.getSecret(REFRESH_TOKEN_TYPE), (err: any, decode) => {
+    await userService.isBlacklistedToken(refreshToken);
+
+    jwt.verify(refreshToken, userService.getSecret(REFRESH_TOKEN_TYPE), (err, decode) => {
       if (err) {
         if (err.name === 'TokenExpiredError') {
-          res.clearCookie(COOKIE_NAME);
+          res.cookie(COOKIE_NAME, '', COOKIE_OPTIONS);
           tokenRedis.deleteToken(req.refreshTokenIndex);
 
           throw new TokenReissueFailException(resMessage.TOKEN_REISSUE_FAILED);
@@ -33,13 +35,13 @@ export const validateRefreshToken = async (req, res: Response, next: NextFunctio
           );
         }
       } else {
-        if (decode.userId !== userId || ip !== reqIp || device !== reqDevice) {
-          res.clearCookie(COOKIE_NAME);
+        if (decode['userId'] !== userId || ip !== reqIp || device !== reqDevice) {
+          res.cookie(COOKIE_NAME, '', COOKIE_OPTIONS);
           tokenRedis.deleteToken(req.refreshTokenIndex);
 
           throw new TokenReissueFailException(resMessage.TOKEN_REISSUE_FAILED);
         }
-        req.userId = decode.userId;
+        req.userId = decode['userId'];
         next();
       }
     });

@@ -1,14 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import IP from 'ip';
+import { IpDeviceDto } from '../dtos/IpDevice.dto';
 import { resObject } from '../utils/resObject';
 import { statusCode } from '../utils/statusCode';
 
-const setReqIpDevice = async (req, res: Response, next: NextFunction) => {
+const setReqIpDevice = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const ip = IP.address();
     const device = req.header('user-agent');
 
-    const setReqIpDevice: object = { ip: ip, device: device };
+    const setReqIpDevice: IpDeviceDto = { ip: ip, device: device };
 
     req.setReqIpDevice = setReqIpDevice;
     next();

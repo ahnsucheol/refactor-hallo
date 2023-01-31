@@ -30,3 +30,5 @@ const serverPort: number = Number(process.env.SERVER_PORT);
 app.listen(serverPort, () => {
   console.log('Server is running on port:', serverPort);
 });
+
+export default redisClient;

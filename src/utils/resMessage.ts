@@ -7,8 +7,11 @@ export const resMessage = {
   USER_INFO_REQUEST_ERROR: '필요한 유저 정보가 일치하지않습니다.',
   LOGIN_SUCCESS: '로그인을 성공했습니다.',
   LOGIN_FAILED: '로그인을 실패했습니다.',
+  LOGOUT_SUCCESS: '로그아웃을 성공했습니다.',
+  LOGOUT_FAILED: '로그아웃을 실패했습니다.',
   TOKEN_NOT_EXIST: '토큰이 존재하지 않습니다.',
   TOKEN_EXPIRED: '만료된 토큰입니다.',
   TOKEN_REISSUE_SUCCESS: '토큰 재발행을 성공했습니다.',
   TOKEN_REISSUE_FAILED: '토큰 재발행을 실패했습니다.',
+  BLACKLIST_TOKEN: '사용할 수 없는 토큰입니다.',
 };
